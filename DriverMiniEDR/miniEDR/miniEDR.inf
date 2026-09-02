@@ -1,0 +1,86 @@
+;
+; miniEDR file-system minifilter package
+;
+
+[Version]
+Signature = "$WINDOWS NT$"
+Class = "ActivityMonitor"
+ClassGuid = {b86dff51-a31e-4bac-b3cf-e8cfe75c9fc2}
+Provider = %ProviderName%
+DriverVer = 08/29/2026,1.0.0.0
+CatalogFile = miniEDR.cat
+PnpLockdown = 1
+
+[SourceDisksFiles]
+miniEDR.sys = 1,,
+
+[SourceDisksNames]
+1 = %DiskName%,,,
+
+[DestinationDirs]
+MiniEdr.Files = 13
+MiniEdrDownlevel.CopyFiles = 12
+
+; Windows 11 24H2 and later: minifilter parameters live below Parameters.
+[DefaultInstall.NT$ARCH$.10.0...25952]
+OptionDesc = %ServiceDescription%
+CopyFiles = MiniEdr.Files
+
+[DefaultInstall.NT$ARCH$.10.0...25952.Services]
+AddService = %ServiceName%,,MiniEdr.Service
+
+[MiniEdr.Service]
+DisplayName = %ServiceName%
+Description = %ServiceDescription%
+ServiceBinary = %13%\miniEDR.sys
+Dependencies = FltMgr
+ServiceType = 2
+StartType = 3
+ErrorControl = 1
+LoadOrderGroup = "FSFilter Activity Monitor"
+AddReg = MiniEdr.AddRegistry
+
+[MiniEdr.AddRegistry]
+HKR,"Parameters\Instances","DefaultInstance",0x00000000,%DefaultInstance%
+HKR,"Parameters\Instances\"%DefaultInstance%,"Altitude",0x00000000,%InstanceAltitude%
+HKR,"Parameters\Instances\"%DefaultInstance%,"Flags",0x00010001,0x0
+
+[MiniEdr.Files]
+miniEDR.sys
+
+; Downlevel Windows uses the legacy Instances location and system drivers path.
+; The binary itself requires Windows 10 version 2004 or later (ExAllocatePool2).
+[DefaultInstall.NT$ARCH$]
+OptionDesc = %ServiceDescription%
+CopyFiles = MiniEdrDownlevel.CopyFiles
+
+[DefaultInstall.NT$ARCH$.Services]
+AddService = %ServiceName%,,MiniEdrDownlevel.Service
+
+[MiniEdrDownlevel.Service]
+DisplayName = %ServiceName%
+Description = %ServiceDescription%
+ServiceBinary = %12%\miniEDR.sys
+Dependencies = FltMgr
+ServiceType = 2
+StartType = 3
+ErrorControl = 1
+LoadOrderGroup = "FSFilter Activity Monitor"
+AddReg = MiniEdrDownlevel.AddRegistry
+
+[MiniEdrDownlevel.AddRegistry]
+HKR,"Instances","DefaultInstance",0x00000000,%DefaultInstance%
+HKR,"Instances\"%DefaultInstance%,"Altitude",0x00000000,%InstanceAltitude%
+HKR,"Instances\"%DefaultInstance%,"Flags",0x00010001,0x0
+
+[MiniEdrDownlevel.CopyFiles]
+miniEDR.sys
+
+[Strings]
+ProviderName = "miniEDR Project"
+ServiceName = "miniEDR"
+ServiceDescription = "miniEDR activity monitoring minifilter"
+DiskName = "miniEDR installation media"
+DefaultInstance = "miniEDR Default Instance"
+; Development-only value. Request a Microsoft-assigned altitude before release.
+InstanceAltitude = "370030.20260829"
