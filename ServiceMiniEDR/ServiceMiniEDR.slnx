@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="ServiceMiniEDR/ServiceMiniEDR.vcxproj" />
+  <Project Path="ServiceMiniEDR/ServiceMiniEDR.vcxproj" Id="ffbee62c-8f15-4d12-9fcd-622a1286cd0c" />
 </Solution>
