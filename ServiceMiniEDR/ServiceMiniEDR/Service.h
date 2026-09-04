@@ -2,7 +2,11 @@
 
 #include <Windows.h>
 
+#include "EventTypesList.h"
+#include "ConnectionTypes.h"
+
 #define DRIVER_NAME L"\\\\.\\miniEDR"
+#define SERVICE_PIPE_NAME L"\\\\.\\pipe\\miniEDR"
 
 #define MAX_EVENT_LENGTH 1072
 
@@ -18,10 +22,31 @@ extern SERVICE_STATUS g_ServiceStatus;
 extern HANDLE g_StopEvent;
 extern HANDLE g_DriverHandle;
 
+VOID WINAPI ServiceMain(
+	DWORD argc,
+	LPWSTR* argv
+);
+
 HANDLE OpenMiniEDRDriver();
 
 DWORD WINAPI TelemetryWorker(
 	LPVOID Parameter
+);
+
+VOID ProcessEvent(
+	BYTE* EventBuffer,
+	DWORD EventSize
+);
+
+HANDLE CreateTelemetryPipe();
+
+DWORD WINAPI PipeWorker(
+	LPVOID Parameter
+);
+
+BOOLEAN SendEventToGui(
+	PVOID Buffer,
+	DWORD Size
 );
 
 // Get event from queue
@@ -32,4 +57,4 @@ DWORD WINAPI TelemetryWorker(
 	FILE_ANY_ACCESS \
 )
 
-VOID ClenupService();
+VOID CleanupService();

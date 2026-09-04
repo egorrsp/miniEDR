@@ -33,12 +33,18 @@
     <ClCompile Include="ProcessEvent.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="PipeSrever.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Service.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
     <ClInclude Include="EventTypesList.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="ConnectionTypes.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
   </ItemGroup>

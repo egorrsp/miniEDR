@@ -75,9 +75,6 @@
     <ClInclude Include="network.h">
       <Filter>Source Files\telemetry</Filter>
     </ClInclude>
-    <ClInclude Include="network_types.h">
-      <Filter>Source Files\telemetry</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Inf Include="miniEDR.inf">

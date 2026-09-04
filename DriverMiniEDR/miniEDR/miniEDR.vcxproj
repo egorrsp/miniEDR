@@ -111,7 +111,6 @@
   <ItemGroup>
     <ClInclude Include="miniedr.h" />
     <ClInclude Include="network.h" />
-    <ClInclude Include="network_types.h" />
     <ClInclude Include="queue.h" />
     <ClInclude Include="telemetry.h" />
   </ItemGroup>

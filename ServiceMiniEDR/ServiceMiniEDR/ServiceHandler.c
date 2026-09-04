@@ -7,6 +7,10 @@ DWORD WINAPI ServiceControlHandler(
     LPVOID context
 )
 {
+	UNREFERENCED_PARAMETER(eventType);
+	UNREFERENCED_PARAMETER(eventData);
+	UNREFERENCED_PARAMETER(context);
+
     switch (control)
     {
     case SERVICE_CONTROL_STOP:

@@ -1,11 +1,9 @@
 #pragma once
 
 #include <fltKernel.h>
-#include "network_types.h"
-
 #define MINI_EDR_PATH_CAPACITY 256
 
-NTSTATUS InitTelemetry(VOID);
+NTSTATUS InitTelemetry(PDEVICE_OBJECT DeviceObject);
 
 NTSTATUS ProcessWatcher(VOID);
 NTSTATUS FileMappingWatcher(VOID);
@@ -21,6 +19,8 @@ NTSTATUS FileMappingWatcher(VOID);
 #define EVENT_FILE_RENAME ((ULONG)6)
 #define EVENT_FILE_DELETE ((ULONG)7)
 #define EVENT_FILE_SET_INFORMATION ((ULONG)8)
+
+#define EVENT_NETWORK_CONNECT ((ULONG)9)
 
 /// Queue structures of telemetry events
 
@@ -169,13 +169,37 @@ typedef struct _FILE_EVENT_SET_INFO {
 
 } FILE_EVENT_SET_INFO, *PFILE_EVENT_SET_INFO;
 
+
+// Network connection
+typedef struct _NETWORK_EVENT_DATA
+{
+	ULONG EventType;
+
+	HANDLE ProcessId;
+
+	LARGE_INTEGER Timestamp;
+
+	UINT8 Protocol;
+
+	UINT32 LocalAddress;
+	UINT32 RemoteAddress;
+
+	UINT16 LocalPort;
+	UINT16 RemotePort;
+
+} NETWORK_EVENT_DATA, *PNETWORK_EVENT_DATA;
+
+typedef struct _NETWORK_EVENT
+{
+	LIST_ENTRY ListEntry;
+
+	NETWORK_EVENT_DATA EventData;
+
+} NETWORK_EVENT, *PNETWORK_EVENT;
+
 // Filter for I/O in files
 NTSTATUS InitFileFilter(PDRIVER_OBJECT);
 VOID CloseFileFilter(VOID);
-
-// Filter for network activity
-NTSTATUS InitNetworkFilter(PDEVICE_OBJECT);
-VOID CloseNetworkFilter(VOID);
 
 extern PFLT_FILTER g_Filter;
 

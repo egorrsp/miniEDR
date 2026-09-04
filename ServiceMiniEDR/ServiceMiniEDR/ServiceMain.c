@@ -4,7 +4,8 @@ SERVICE_STATUS_HANDLE g_ServiceStatusHandle = NULL;
 SERVICE_STATUS g_ServiceStatus = { 0 };
 HANDLE g_StopEvent = NULL;
 HANDLE g_DriverHandle = INVALID_HANDLE_VALUE;
-HANDLE g_DriverTelemetryThread = INVALID_HANDLE_VALUE;
+HANDLE g_DriverTelemetryThread = NULL;
+HANDLE g_ServerPipeThread = NULL;
 
 void WINAPI ServiceMain(
     DWORD argc,
@@ -13,6 +14,7 @@ void WINAPI ServiceMain(
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
+	DWORD startError = ERROR_SUCCESS;
 
     g_ServiceStatusHandle =
         RegisterServiceCtrlHandlerExW(
@@ -72,18 +74,8 @@ void WINAPI ServiceMain(
 
     if (g_DriverHandle == INVALID_HANDLE_VALUE)
     {
-        g_ServiceStatus.dwCurrentState =
-            SERVICE_STOPPED;
-
-        g_ServiceStatus.dwWin32ExitCode =
-            GetLastError();
-
-        SetServiceStatus(
-            &g_ServiceStatusHandle,
-            &g_ServiceStatus
-        );
-
-        return;
+		startError = GetLastError();
+		goto StartupFailed;
     }
 
     g_DriverTelemetryThread = CreateThread(
@@ -94,6 +86,27 @@ void WINAPI ServiceMain(
         0,
         NULL
     );
+
+	if (g_DriverTelemetryThread == NULL)
+	{
+		startError = GetLastError();
+		goto StartupFailed;
+	}
+
+    g_ServerPipeThread = CreateThread(
+        NULL,
+        0,
+        PipeWorker,
+        NULL,
+        0,
+        NULL
+    );
+
+	if (g_ServerPipeThread == NULL)
+	{
+		startError = GetLastError();
+		goto StartupFailed;
+	}
 
     g_ServiceStatus.dwControlsAccepted =
         SERVICE_ACCEPT_STOP;
@@ -111,7 +124,7 @@ void WINAPI ServiceMain(
         INFINITE
     );
 
-    ClenupService();
+    CleanupService();
 
     CloseHandle(
         g_StopEvent
@@ -128,26 +141,56 @@ void WINAPI ServiceMain(
         g_ServiceStatusHandle,
         &g_ServiceStatus
     );
+
+	return;
+
+StartupFailed:
+	CleanupService();
+
+	if (g_StopEvent != NULL)
+	{
+		CloseHandle(g_StopEvent);
+		g_StopEvent = NULL;
+	}
+
+	g_ServiceStatus.dwControlsAccepted = 0;
+	g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
+	g_ServiceStatus.dwWin32ExitCode = startError;
+
+	SetServiceStatus(
+		g_ServiceStatusHandle,
+		&g_ServiceStatus
+	);
 }
 
 
 
-VOID ClenupService()
+VOID CleanupService()
 {
-    SetEvent(
-        g_StopEvent
-    );
+	if (g_StopEvent != NULL)
+	{
+		SetEvent(g_StopEvent);
+	}
 
-    WaitForSingleObject(
-        g_DriverTelemetryThread,
-        0
-    );
+	if (g_DriverTelemetryThread != NULL)
+	{
+		CancelSynchronousIo(g_DriverTelemetryThread);
+		WaitForSingleObject(g_DriverTelemetryThread, INFINITE);
+		CloseHandle(g_DriverTelemetryThread);
+		g_DriverTelemetryThread = NULL;
+	}
 
-    CloseHandle(
-        g_DriverTelemetryThread
-    );
+	if (g_ServerPipeThread != NULL)
+	{
+		CancelSynchronousIo(g_ServerPipeThread);
+		WaitForSingleObject(g_ServerPipeThread, INFINITE);
+		CloseHandle(g_ServerPipeThread);
+		g_ServerPipeThread = NULL;
+	}
 
-    CloseHandle(
-        g_DriverHandle
-    );
+	if (g_DriverHandle != INVALID_HANDLE_VALUE)
+	{
+		CloseHandle(g_DriverHandle);
+		g_DriverHandle = INVALID_HANDLE_VALUE;
+	}
 }

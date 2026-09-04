@@ -40,7 +40,8 @@ DWORD WINAPI TelemetryWorker(
 		}
 
 		ProcessEvent(
-			&event
+			event,
+			bytesReturned
 		);
 	}
 

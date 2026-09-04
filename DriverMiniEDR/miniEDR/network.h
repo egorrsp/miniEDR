@@ -12,8 +12,6 @@
 #include <fwpmk.h>
 #pragma warning(pop)
 
-#include "network_types.h"
-
 extern UINT32 g_NetworkCalloutId;
 
 NTSTATUS InitNetworkFilter(
@@ -37,15 +35,7 @@ VOID NTAPI NetworkClassify(
 	FWPS_CLASSIFY_OUT0* ClassifyOut
 );
 
-BOOLEAN PushEventToQueue(
-	PLIST_ENTRY Entry
-);
-
 BOOLEAN PushNetworkConnectEvent(
 	const FWPS_INCOMING_VALUES0* InFixedValues,
 	const FWPS_INCOMING_METADATA_VALUES0* InMetaValues
-);
-
-BOOLEAN PushNetworkEventToQueue(
-	PNETWORK_EVENT Event
 );

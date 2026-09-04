@@ -1,3 +1,4 @@
+#include "miniedr.h"
 #include "network.h"
 
 BOOLEAN PushNetworkConnectEvent(

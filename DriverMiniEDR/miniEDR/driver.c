@@ -27,17 +27,17 @@ NTSTATUS DriverEntry(
 	DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] =
 		MiniEdrDeviceControl;
 
-	status = InitTelemetry();
+	status = InitMiniEDR(DriverObject);
 	if (!NT_SUCCESS(status))
 	{
 		ClearEventQueue();
 		return status;
 	}
 
-	status = InitMiniEDR(DriverObject);
+	status = InitTelemetry(g_ControlDeviceObject);
 	if (!NT_SUCCESS(status))
 	{
-		CloseTelemetry();
+		UnloadMiniEDR();
 		ClearEventQueue();
 		return status;
 	}
@@ -45,18 +45,8 @@ NTSTATUS DriverEntry(
 	status = InitFileFilter(DriverObject);
 	if (!NT_SUCCESS(status))
 	{
-		UnloadMiniEDR();
 		CloseTelemetry();
-		ClearEventQueue();
-		return status;
-	}
-
-	status = InitNetworkFilter(g_ControlDeviceObject);
-	if (!NT_SUCCESS(status))
-	{
-		CloseFileFilter();
 		UnloadMiniEDR();
-		CloseTelemetry();
 		ClearEventQueue();
 		return status;
 	}
@@ -76,7 +66,6 @@ VOID UnloadDriver(
 	}
 
 	CloseFileFilter();
-	CloseNetworkFilter();
 	CloseTelemetry();
 	ClearEventQueue();
 

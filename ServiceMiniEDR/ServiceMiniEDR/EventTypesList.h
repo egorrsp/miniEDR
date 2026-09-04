@@ -2,6 +2,9 @@
 
 #include <Windows.h>
 
+#if !defined(_WIN64)
+#error miniEDR telemetry wire format requires a 64-bit service build
+#endif
 
 #define MINI_EDR_PATH_CAPACITY 256
 
@@ -17,6 +20,7 @@
 #define EVENT_FILE_DELETE ((ULONG)7)
 #define EVENT_FILE_SET_INFORMATION ((ULONG)8)
 
+#define EVENT_NETWORK_CONNECT ((ULONG)9)
 
 
 /// Queue structures of telemetry events
@@ -33,16 +37,7 @@ typedef struct _PROCESS_EVENT_DATA
 
 	WCHAR ImagePath[MINI_EDR_PATH_CAPACITY];
 
-} PROCESS_EVENT_DATA, * PPROCESS_EVENT_DATA;
-
-typedef struct _PROCESS_EVENT
-{
-	LIST_ENTRY ListEntry;
-
-	PROCESS_EVENT_DATA EventData;
-
-} PROCESS_EVENT, * PPROCESS_EVENT;
-
+} PROCESS_EVENT_DATA, *PPROCESS_EVENT_DATA;
 
 // File mapping / unmapping in memory
 typedef struct _FILE_EVENT_DATA
@@ -61,16 +56,7 @@ typedef struct _FILE_EVENT_DATA
 
 	WCHAR ImagePath[MINI_EDR_PATH_CAPACITY];
 
-} FILE_EVENT_DATA, * PFILE_EVENT_DATA;
-
-typedef struct _FILE_EVENT
-{
-	LIST_ENTRY ListEntry;
-
-	FILE_EVENT_DATA EventData;
-
-} FILE_EVENT, * PFILE_EVENT;
-
+} FILE_EVENT_DATA, *PFILE_EVENT_DATA;
 
 // File changing - CREATE
 typedef struct _FILE_CREATE_EVENT_DATA {
@@ -94,15 +80,7 @@ typedef struct _FILE_CREATE_EVENT_DATA {
 
 	WCHAR FilePath[MINI_EDR_PATH_CAPACITY];
 
-} FILE_CREATE_EVENT_DATA, * PFILE_CREATE_EVENT_DATA;
-
-typedef struct _FILE_CREATE_EVENT {
-
-	LIST_ENTRY ListEntry;
-
-	FILE_CREATE_EVENT_DATA EventData;
-
-} FILE_CREATE_EVENT, * PFILE_CREATE_EVENT;
+} FILE_CREATE_EVENT_DATA, *PFILE_CREATE_EVENT_DATA;
 
 // File changing - WRITE
 typedef struct _FILE_WRITE_EVENT_DATA
@@ -125,16 +103,7 @@ typedef struct _FILE_WRITE_EVENT_DATA
 
 	WCHAR FilePath[MINI_EDR_PATH_CAPACITY];
 
-} FILE_WRITE_EVENT_DATA, * PFILE_WRITE_EVENT_DATA;
-
-typedef struct _FILE_WRITE_EVENT {
-
-	LIST_ENTRY ListEntry;
-
-	FILE_WRITE_EVENT_DATA EventData;
-
-} FILE_WRITE_EVENT, * PFILE_WRITE_EVENT;
-
+} FILE_WRITE_EVENT_DATA, *PFILE_WRITE_EVENT_DATA;
 
 //File changing - Set Information
 typedef struct _FILE_EVENT_SET_INFO_DATA {
@@ -147,7 +116,7 @@ typedef struct _FILE_EVENT_SET_INFO_DATA {
 
 	NTSTATUS Status;
 
-	FILE_INFORMATION_CLASS InformationClass;
+	ULONG InformationClass;
 	ULONG RequestorMode;
 
 	BOOLEAN DeleteFile;
@@ -156,12 +125,23 @@ typedef struct _FILE_EVENT_SET_INFO_DATA {
 	WCHAR FilePath[MINI_EDR_PATH_CAPACITY];
 	WCHAR NewFilePath[MINI_EDR_PATH_CAPACITY];
 
-} FILE_EVENT_SET_INFO_DATA, * PFILE_EVENT_SET_INFO_DATA;
+} FILE_EVENT_SET_INFO_DATA, *PFILE_EVENT_SET_INFO_DATA;
 
-typedef struct _FILE_EVENT_SET_INFO {
+// Network connection
+typedef struct _NETWORK_EVENT_DATA
+{
+	ULONG EventType;
 
-	LIST_ENTRY ListEntry;
+	HANDLE ProcessId;
 
-	FILE_EVENT_SET_INFO_DATA EventData;
+	LARGE_INTEGER Timestamp;
 
-} FILE_EVENT_SET_INFO, * PFILE_EVENT_SET_INFO;
+	UINT8 Protocol;
+
+	UINT32 LocalAddress;
+	UINT32 RemoteAddress;
+
+	UINT16 LocalPort;
+	UINT16 RemotePort;
+
+} NETWORK_EVENT_DATA, *PNETWORK_EVENT_DATA;

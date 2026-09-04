@@ -1,9 +1,14 @@
 #include "miniedr.h"
+#include "network.h"
 
 // Main initialization telemetry function
-NTSTATUS InitTelemetry(VOID)
+NTSTATUS InitTelemetry(
+	PDEVICE_OBJECT DeviceObject
+)
 {
 	NTSTATUS status;
+	BOOLEAN processWatcherInitialized = FALSE;
+	BOOLEAN fileMappingWatcherInitialized = FALSE;
 
 	status = ProcessWatcher();
 
@@ -11,16 +16,36 @@ NTSTATUS InitTelemetry(VOID)
 	{
 		return status;
 	}
+	processWatcherInitialized = TRUE;
 
 	status = FileMappingWatcher();
 
 	if (!NT_SUCCESS(status))
 	{
+		goto Cleanup;
+	}
+	fileMappingWatcherInitialized = TRUE;
+
+	status = InitNetworkFilter(DeviceObject);
+	if (!NT_SUCCESS(status))
+	{
+		goto Cleanup;
+	}
+
+	return STATUS_SUCCESS;
+
+Cleanup:
+	if (fileMappingWatcherInitialized)
+	{
+		PsRemoveLoadImageNotifyRoutine(FileNotifyCallback);
+	}
+
+	if (processWatcherInitialized)
+	{
 		PsSetCreateProcessNotifyRoutineEx(
 			ProcessNotifyCallback,
 			TRUE
 		);
-		return status;
 	}
 
 	return status;
@@ -29,6 +54,8 @@ NTSTATUS InitTelemetry(VOID)
 VOID CloseTelemetry(VOID)
 {
 	NTSTATUS status;
+
+	CloseNetworkFilter();
 
 	status = PsSetCreateProcessNotifyRoutineEx(
 		ProcessNotifyCallback,
