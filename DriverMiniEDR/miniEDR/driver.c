@@ -12,6 +12,12 @@ NTSTATUS DriverEntry(
 
 	UNREFERENCED_PARAMETER(RegistryPath);
 
+	DbgPrintEx(
+		DPFLTR_IHVDRIVER_ID,
+		DPFLTR_ERROR_LEVEL,
+		"miniEDR: miniedr started succefully\n"
+	);
+
 	g_DriverObject = DriverObject;
 	g_UnloadStarted = 0;
 

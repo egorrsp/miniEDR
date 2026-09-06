@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="GUIMiniEDR/GUIMiniEDR.vcxproj" />
+  <Project Path="GUIMiniEDR/GUIMiniEDR.vcxproj" Id="60e4477c-8b2c-4643-809c-effd099aba4f" />
 </Solution>

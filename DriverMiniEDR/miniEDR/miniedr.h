@@ -6,7 +6,7 @@
 #include "queue.h"
 
 #define NT_DEVICE_NAME L"\\Device\\miniEDR"
-#define DOS_DEVICE_NAME L"\\DosDevice\\miniEDR"
+#define DOS_DEVICE_NAME L"\\DosDevices\\miniEDR"
 
 // Get event from queue
 #define IOCTL_GET_EVENT CTL_CODE( \
