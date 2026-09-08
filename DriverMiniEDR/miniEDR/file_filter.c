@@ -118,6 +118,12 @@ NTSTATUS InitFileFilter(
 
 	if (!NT_SUCCESS(status))
 	{
+		DbgPrintEx(
+			DPFLTR_IHVDRIVER_ID,
+			DPFLTR_ERROR_LEVEL,
+			"miniedr: FltRegisterFilter crashes: 0x%08X",
+			status
+		);
 		return status;
 	}
 
@@ -128,8 +134,23 @@ NTSTATUS InitFileFilter(
 	if (!NT_SUCCESS(status))
 	{
 		FltUnregisterFilter(g_Filter);
+
+		DbgPrintEx(
+			DPFLTR_IHVDRIVER_ID,
+			DPFLTR_ERROR_LEVEL,
+			"miniedr: FltStartFiltering crashes: 0x%08X",
+			status
+		);
+
 		g_Filter = NULL;
 	}
+
+	DbgPrintEx(
+		DPFLTR_IHVDRIVER_ID,
+		DPFLTR_ERROR_LEVEL,
+		"miniedr: InitFileFilter booted succefully: 0x%08X",
+		status
+	);
 
 	return status;
 }

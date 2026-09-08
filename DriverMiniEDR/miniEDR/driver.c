@@ -40,6 +40,12 @@ NTSTATUS DriverEntry(
 		return status;
 	}
 
+	DbgPrintEx(
+		DPFLTR_IHVDRIVER_ID,
+		DPFLTR_ERROR_LEVEL,
+		"miniEDR: miniedr InitMiniEDR booted succefully\n"
+	);
+
 	status = InitTelemetry(g_ControlDeviceObject);
 	if (!NT_SUCCESS(status))
 	{
@@ -47,6 +53,12 @@ NTSTATUS DriverEntry(
 		ClearEventQueue();
 		return status;
 	}
+
+	DbgPrintEx(
+		DPFLTR_IHVDRIVER_ID,
+		DPFLTR_ERROR_LEVEL,
+		"miniEDR: miniedr InitTelemetry booted succefully\n"
+	);
 
 	status = InitFileFilter(DriverObject);
 	if (!NT_SUCCESS(status))
@@ -56,6 +68,12 @@ NTSTATUS DriverEntry(
 		ClearEventQueue();
 		return status;
 	}
+
+	DbgPrintEx(
+		DPFLTR_IHVDRIVER_ID,
+		DPFLTR_ERROR_LEVEL,
+		"miniEDR: miniedr fully booted succefully\n"
+	);
 
 	return STATUS_SUCCESS;
 }

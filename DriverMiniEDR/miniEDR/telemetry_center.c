@@ -6,14 +6,28 @@ NTSTATUS InitTelemetry(
 	PDEVICE_OBJECT DeviceObject
 )
 {
-	NTSTATUS status;
+	NTSTATUS status = FALSE;
 	BOOLEAN processWatcherInitialized = FALSE;
 	BOOLEAN fileMappingWatcherInitialized = FALSE;
+
+	DbgPrintEx(
+		DPFLTR_IHVDRIVER_ID,
+		DPFLTR_ERROR_LEVEL,
+		"miniedr: InitTelemetry start 0x%08X\n",
+		status
+	);
 
 	status = ProcessWatcher();
 
 	if (!NT_SUCCESS(status))
 	{
+		DbgPrintEx(
+			DPFLTR_IHVDRIVER_ID,
+			DPFLTR_ERROR_LEVEL,
+			"miniedr: ProcessWatcher down: 0x%08X\n",
+			status
+		);
+
 		return status;
 	}
 	processWatcherInitialized = TRUE;
@@ -22,13 +36,28 @@ NTSTATUS InitTelemetry(
 
 	if (!NT_SUCCESS(status))
 	{
+		DbgPrintEx(
+			DPFLTR_IHVDRIVER_ID,
+			DPFLTR_ERROR_LEVEL,
+			"miniedr: FileMappingWatcher down: 0x%08X\n",
+			status
+		);
+
 		goto Cleanup;
 	}
 	fileMappingWatcherInitialized = TRUE;
 
 	status = InitNetworkFilter(DeviceObject);
+
 	if (!NT_SUCCESS(status))
 	{
+		DbgPrintEx(
+			DPFLTR_IHVDRIVER_ID,
+			DPFLTR_ERROR_LEVEL,
+			"miniedr: InitNetworkFilter down: 0x%08X\n",
+			status
+		);
+
 		goto Cleanup;
 	}
 

@@ -3,11 +3,18 @@
 // Process create/close callback routine and helpers
 NTSTATUS ProcessWatcher(VOID)
 {
-	NTSTATUS status = STATUS_SUCCESS;
+	NTSTATUS status;
 
 	status = PsSetCreateProcessNotifyRoutineEx(
 		ProcessNotifyCallback,
 		FALSE
+	);
+
+	DbgPrintEx(
+		DPFLTR_IHVDRIVER_ID,
+		DPFLTR_ERROR_LEVEL,
+		"miniEDR: PsSetCreateProcessNotifyRoutineEx returned 0x%08X\n",
+		status
 	);
 
 	return status;
